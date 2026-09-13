@@ -22,7 +22,7 @@ services:
     environment:
       PORT: ${BACKEND_PORT}
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     depends_on:
       db:
         condition: service_healthy
