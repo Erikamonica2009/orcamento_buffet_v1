@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ItemCategoria {
+  COMIDA
+  BEBIDA
+  DECORACAO
+  ESTRUTURA
+  ENTRETENIMENTO
+}
+
+enum OrcamentoStatus {
+  PENDENTE
+  EM_ANALISE
+  APROVADO
+  RECUSADO
+}
+
+model Admin {
+  id                    Int         @id @default(autoincrement())
+  nome                  String
+  email                 String      @unique
+  senhaHash             String      @map("senha_hash")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  orcamentosRespondidos Orcamento[] @relation("RespondidoPor")
+
+  @@map("admins")
+}
+
+model Cliente {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  email      String      @unique
+  senhaHash  String      @map("senha_hash")
+  telefone   String
+  cpf        String      @unique
+  createdAt  DateTime    @default(now()) @map("created_at")
+  orcamentos Orcamento[]
+
+  @@map("clientes")
+}
+
+model TipoEvento {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  descricao  String
+  ativo      Boolean     @default(true)
+  orcamentos Orcamento[]
+
+  @@map("tipos_evento")
+}
+
+model Item {
+  id             Int             @id @default(autoincrement())
+  nome           String
+  descricao      String
+  categoria      ItemCategoria
+  ativo          Boolean         @default(true)
+  orcamentoItens OrcamentoItem[]
+
+  @@map("itens")
+}
+
+model Orcamento {
+  id              Int             @id @default(autoincrement())
+  clienteId       Int             @map("cliente_id")
+  cliente         Cliente         @relation(fields: [clienteId], references: [id])
+  tipoEventoId    Int             @map("tipo_evento_id")
+  tipoEvento      TipoEvento      @relation(fields: [tipoEventoId], references: [id])
+  dataEvento      DateTime        @map("data_evento")
+  numConvidados   Int             @map("num_convidados")
+  observacoes     String?
+  status          OrcamentoStatus @default(PENDENTE)
+  valorTotal      Decimal?        @map("valor_total") @db.Decimal(10, 2)
+  respondidoPorId Int?            @map("respondido_por_id")
+  respondidoPor   Admin?          @relation("RespondidoPor", fields: [respondidoPorId], references: [id])
+  respondidoEm    DateTime?       @map("respondido_em")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  itens           OrcamentoItem[]
+
+  @@map("orcamentos")
+}
+
+model OrcamentoItem {
+  orcamentoId Int       @map("orcamento_id")
+  orcamento   Orcamento @relation(fields: [orcamentoId], references: [id])
+  itemId      Int       @map("item_id")
+  item        Item      @relation(fields: [itemId], references: [id])
+
+  @@id([orcamentoId, itemId])
+  @@map("orcamento_itens")
+}
