@@ -5,6 +5,7 @@ import { notFoundHandler } from "./middlewares/notFound";
 import { authRouter } from "./controllers/auth.controller";
 import { adminsRouter } from "./controllers/admins.controller";
 import { clientesRouter } from "./controllers/clientes.controller";
+import { tiposEventoRouter } from "./controllers/tiposEvento.controller";
 
 export const app = express();
 
@@ -18,6 +19,7 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRouter);
 app.use("/admins", adminsRouter);
 app.use("/clientes", clientesRouter);
+app.use("/tipos-evento", tiposEventoRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
