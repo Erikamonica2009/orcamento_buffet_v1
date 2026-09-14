@@ -3,6 +3,7 @@ import { asyncHandler } from "../middlewares/asyncHandler";
 import { requireAuth, requireRole } from "../middlewares/auth";
 import { createAdminSchema, updateAdminSchema } from "../schemas/admins.schemas";
 import * as adminsService from "../services/admins.service";
+import { parseId } from "../utils/parseId";
 
 export const adminsRouter = Router();
 
@@ -18,7 +19,7 @@ adminsRouter.get(
 adminsRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
-    res.json(await adminsService.getAdmin(Number(req.params.id)));
+    res.json(await adminsService.getAdmin(parseId(req.params.id)));
   })
 );
 
@@ -34,14 +35,14 @@ adminsRouter.put(
   "/:id",
   asyncHandler(async (req, res) => {
     const input = updateAdminSchema.parse(req.body);
-    res.json(await adminsService.updateAdmin(Number(req.params.id), input));
+    res.json(await adminsService.updateAdmin(parseId(req.params.id), input));
   })
 );
 
 adminsRouter.delete(
   "/:id",
   asyncHandler(async (req, res) => {
-    await adminsService.deleteAdmin(Number(req.params.id));
+    await adminsService.deleteAdmin(parseId(req.params.id));
     res.status(204).send();
   })
 );

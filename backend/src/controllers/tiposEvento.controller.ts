@@ -3,6 +3,7 @@ import { asyncHandler } from "../middlewares/asyncHandler";
 import { requireAuth, requireRole } from "../middlewares/auth";
 import { createTipoEventoSchema, updateTipoEventoSchema } from "../schemas/tiposEvento.schemas";
 import * as tiposEventoService from "../services/tiposEvento.service";
+import { parseId } from "../utils/parseId";
 
 export const tiposEventoRouter = Router();
 
@@ -19,7 +20,7 @@ tiposEventoRouter.get(
   "/:id",
   requireAuth,
   asyncHandler(async (req, res) => {
-    res.json(await tiposEventoService.getTipoEvento(Number(req.params.id)));
+    res.json(await tiposEventoService.getTipoEvento(parseId(req.params.id)));
   })
 );
 
@@ -39,7 +40,7 @@ tiposEventoRouter.put(
   requireRole("admin"),
   asyncHandler(async (req, res) => {
     const input = updateTipoEventoSchema.parse(req.body);
-    res.json(await tiposEventoService.updateTipoEvento(Number(req.params.id), input));
+    res.json(await tiposEventoService.updateTipoEvento(parseId(req.params.id), input));
   })
 );
 
@@ -48,6 +49,6 @@ tiposEventoRouter.delete(
   requireAuth,
   requireRole("admin"),
   asyncHandler(async (req, res) => {
-    res.json(await tiposEventoService.deactivateTipoEvento(Number(req.params.id)));
+    res.json(await tiposEventoService.deactivateTipoEvento(parseId(req.params.id)));
   })
 );

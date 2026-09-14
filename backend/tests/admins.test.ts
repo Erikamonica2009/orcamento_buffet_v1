@@ -58,4 +58,21 @@ describe("Admins CRUD", () => {
       .send({ nome: "Duplicado", email: ADMIN_EMAIL, senha: "senha123456" });
     expect(res.status).toBe(409);
   });
+
+  it("rejects updating an admin's email to one already in use with 409", async () => {
+    const createRes = await agent
+      .post("/admins")
+      .send({ nome: "Outro Admin", email: "admins-test-outro@buffet.com", senha: "outrasenha123" });
+    const otherId = createRes.body.id;
+
+    const res = await agent.put(`/admins/${otherId}`).send({ email: ADMIN_EMAIL });
+    expect(res.status).toBe(409);
+
+    await agent.delete(`/admins/${otherId}`);
+  });
+
+  it("rejects a non-numeric id param with 400 instead of crashing", async () => {
+    const res = await agent.get("/admins/not-a-number");
+    expect(res.status).toBe(400);
+  });
 });

@@ -34,6 +34,13 @@ export async function createAdmin(input: CreateAdminInput) {
 export async function updateAdmin(id: number, input: UpdateAdminInput) {
   await getAdmin(id);
 
+  if (input.email !== undefined) {
+    const existing = await adminsRepo.findAdminByEmail(input.email);
+    if (existing && existing.id !== id) {
+      throw new AppError(409, "Já existe um administrador com este e-mail");
+    }
+  }
+
   const data: { nome?: string; email?: string; senhaHash?: string } = {};
   if (input.nome !== undefined) data.nome = input.nome;
   if (input.email !== undefined) data.email = input.email;

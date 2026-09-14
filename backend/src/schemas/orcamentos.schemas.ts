@@ -7,7 +7,10 @@ export const createOrcamentoSchema = z.object({
   dataEvento: z.coerce.date(),
   numConvidados: z.number().int().positive(),
   observacoes: z.string().optional(),
-  itensIds: z.array(z.number().int().positive()).min(1, "Selecione ao menos um item"),
+  itensIds: z
+    .array(z.number().int().positive())
+    .min(1, "Selecione ao menos um item")
+    .refine((ids) => new Set(ids).size === ids.length, { message: "Itens duplicados" }),
 });
 
 export const updateOrcamentoStatusSchema = z

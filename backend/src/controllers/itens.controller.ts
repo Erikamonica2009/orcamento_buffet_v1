@@ -3,6 +3,7 @@ import { asyncHandler } from "../middlewares/asyncHandler";
 import { requireAuth, requireRole } from "../middlewares/auth";
 import { createItemSchema, updateItemSchema } from "../schemas/itens.schemas";
 import * as itensService from "../services/itens.service";
+import { parseId } from "../utils/parseId";
 
 export const itensRouter = Router();
 
@@ -19,7 +20,7 @@ itensRouter.get(
   "/:id",
   requireAuth,
   asyncHandler(async (req, res) => {
-    res.json(await itensService.getItem(Number(req.params.id)));
+    res.json(await itensService.getItem(parseId(req.params.id)));
   })
 );
 
@@ -39,7 +40,7 @@ itensRouter.put(
   requireRole("admin"),
   asyncHandler(async (req, res) => {
     const input = updateItemSchema.parse(req.body);
-    res.json(await itensService.updateItem(Number(req.params.id), input));
+    res.json(await itensService.updateItem(parseId(req.params.id), input));
   })
 );
 
@@ -48,6 +49,6 @@ itensRouter.delete(
   requireAuth,
   requireRole("admin"),
   asyncHandler(async (req, res) => {
-    res.json(await itensService.deactivateItem(Number(req.params.id)));
+    res.json(await itensService.deactivateItem(parseId(req.params.id)));
   })
 );

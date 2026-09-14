@@ -14,12 +14,13 @@ let clienteAgent: ReturnType<typeof request.agent>;
 let outroClienteAgent: ReturnType<typeof request.agent>;
 let tipoEventoId: number;
 let itemId: number;
+let clienteId: number;
 
 beforeAll(async () => {
   const senhaHash = await bcrypt.hash(SENHA, 10);
 
   await prisma.admin.create({ data: { nome: "Admin Teste", email: ADMIN_EMAIL, senhaHash } });
-  await prisma.cliente.create({
+  const cliente = await prisma.cliente.create({
     data: {
       nome: "Cliente Teste",
       email: CLIENTE_EMAIL,
@@ -28,6 +29,7 @@ beforeAll(async () => {
       cpf: "66666666666",
     },
   });
+  clienteId = cliente.id;
   await prisma.cliente.create({
     data: {
       nome: "Outro Cliente",
@@ -83,6 +85,9 @@ describe("POST /orcamentos", () => {
     expect(res.body.status).toBe("PENDENTE");
     expect(res.body.valorTotal).toBeNull();
     expect(res.body.itens).toHaveLength(1);
+    expect(res.body.cliente?.senhaHash).toBeUndefined();
+    expect(res.body.clienteId).not.toBe(999999);
+    expect(res.body.clienteId).toBe(clienteId);
   });
 
   it("rejects an admin trying to create an orçamento", async () => {
@@ -105,6 +110,16 @@ describe("POST /orcamentos", () => {
     expect(res.status).toBe(400);
   });
 
+  it("rejects a request with duplicate itensIds", async () => {
+    const res = await clienteAgent.post("/orcamentos").send({
+      tipoEventoId,
+      dataEvento: "2026-12-24T20:00:00.000Z",
+      numConvidados: 10,
+      itensIds: [itemId, itemId],
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("rejects an inactive tipoEvento", async () => {
     const inactiveTipo = await prisma.tipoEvento.create({
       data: { nome: "Tipo Teste Inativo", descricao: "x", ativo: false },
@@ -119,6 +134,22 @@ describe("POST /orcamentos", () => {
     expect(res.status).toBe(400);
 
     await prisma.tipoEvento.delete({ where: { id: inactiveTipo.id } });
+  });
+
+  it("rejects an inactive item", async () => {
+    const inactiveItem = await prisma.item.create({
+      data: { nome: "Item Teste Inativo", descricao: "x", categoria: "COMIDA", ativo: false },
+    });
+
+    const res = await clienteAgent.post("/orcamentos").send({
+      tipoEventoId,
+      dataEvento: "2026-12-24T20:00:00.000Z",
+      numConvidados: 10,
+      itensIds: [inactiveItem.id],
+    });
+    expect(res.status).toBe(400);
+
+    await prisma.item.delete({ where: { id: inactiveItem.id } });
   });
 });
 

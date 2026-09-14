@@ -8,6 +8,7 @@ import {
   updateOrcamentoStatusSchema,
 } from "../schemas/orcamentos.schemas";
 import * as orcamentosService from "../services/orcamentos.service";
+import { parseId } from "../utils/parseId";
 
 export const orcamentosRouter = Router();
 
@@ -41,7 +42,7 @@ orcamentosRouter.get(
 orcamentosRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
     if (req.auth!.role === "cliente") {
       res.json(await orcamentosService.getOrcamentoForCliente(id, req.auth!.sub));
       return;
@@ -56,7 +57,7 @@ orcamentosRouter.patch(
   asyncHandler(async (req, res) => {
     const input = updateOrcamentoStatusSchema.parse(req.body);
     const orcamento = await orcamentosService.updateOrcamentoStatus(
-      Number(req.params.id),
+      parseId(req.params.id),
       req.auth!.sub,
       input
     );

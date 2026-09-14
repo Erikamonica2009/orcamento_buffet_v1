@@ -4,6 +4,7 @@ import { requireAuth, requireRole } from "../middlewares/auth";
 import { createRateLimiter } from "../middlewares/rateLimit";
 import { createClienteSchema } from "../schemas/clientes.schemas";
 import * as clientesService from "../services/clientes.service";
+import { parseId } from "../utils/parseId";
 
 export const clientesRouter = Router();
 
@@ -32,6 +33,6 @@ clientesRouter.get(
   requireAuth,
   requireRole("admin"),
   asyncHandler(async (req, res) => {
-    res.json(await clientesService.getCliente(Number(req.params.id)));
+    res.json(await clientesService.getCliente(parseId(req.params.id)));
   })
 );

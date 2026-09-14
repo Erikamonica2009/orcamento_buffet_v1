@@ -2,7 +2,7 @@ import { OrcamentoStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 const includeFull = {
-  cliente: true,
+  cliente: { select: { id: true, nome: true, email: true, telefone: true } },
   tipoEvento: true,
   itens: { include: { item: true } },
 } as const;
