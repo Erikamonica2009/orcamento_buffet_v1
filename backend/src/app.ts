@@ -7,6 +7,7 @@ import { adminsRouter } from "./controllers/admins.controller";
 import { clientesRouter } from "./controllers/clientes.controller";
 import { tiposEventoRouter } from "./controllers/tiposEvento.controller";
 import { itensRouter } from "./controllers/itens.controller";
+import { orcamentosRouter } from "./controllers/orcamentos.controller";
 
 export const app = express();
 
@@ -22,6 +23,7 @@ app.use("/admins", adminsRouter);
 app.use("/clientes", clientesRouter);
 app.use("/tipos-evento", tiposEventoRouter);
 app.use("/itens", itensRouter);
+app.use("/orcamentos", orcamentosRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
