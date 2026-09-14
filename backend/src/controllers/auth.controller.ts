@@ -7,7 +7,8 @@ import { env } from "../config/env";
 
 export const authRouter = Router();
 
-const loginLimiter = createRateLimiter(60_000, 5);
+const adminLoginLimiter = createRateLimiter(60_000, 5);
+const clienteLoginLimiter = createRateLimiter(60_000, 5);
 
 function setAuthCookie(res: Response, token: string) {
   res.cookie("token", token, {
@@ -20,7 +21,7 @@ function setAuthCookie(res: Response, token: string) {
 
 authRouter.post(
   "/admin/login",
-  loginLimiter,
+  adminLoginLimiter,
   asyncHandler(async (req, res) => {
     const { email, senha } = loginSchema.parse(req.body);
     const { token, admin } = await loginAdmin(email, senha);
@@ -31,7 +32,7 @@ authRouter.post(
 
 authRouter.post(
   "/cliente/login",
-  loginLimiter,
+  clienteLoginLimiter,
   asyncHandler(async (req, res) => {
     const { email, senha } = loginSchema.parse(req.body);
     const { token, cliente } = await loginCliente(email, senha);

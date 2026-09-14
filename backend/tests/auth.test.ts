@@ -55,6 +55,20 @@ describe("POST /auth/admin/login", () => {
     expect(res.body).toEqual({ error: "Credenciais inválidas" });
   });
 
+  it("takes comparable time for a wrong password and a non-existent email (no timing side-channel)", async () => {
+    const start1 = Date.now();
+    await request(app).post("/auth/admin/login").send({ email: ADMIN_EMAIL, senha: "senha-errada" });
+    const wrongPasswordMs = Date.now() - start1;
+
+    const start2 = Date.now();
+    await request(app).post("/auth/admin/login").send({ email: "nao-existe@buffet.com", senha: "qualquer" });
+    const noSuchUserMs = Date.now() - start2;
+
+    // Both paths now run a real bcrypt compare, so they should be within the same order of
+    // magnitude — this is a coarse smoke check, not a precise timing-attack proof.
+    expect(Math.abs(wrongPasswordMs - noSuchUserMs)).toBeLessThan(200);
+  });
+
   it("rejects malformed input with 400", async () => {
     const res = await request(app).post("/auth/admin/login").send({ email: "não-é-email" });
     expect(res.status).toBe(400);

@@ -7,18 +7,17 @@ import { Role } from "../middlewares/auth";
 
 const TOKEN_TTL = "8h";
 
+const DUMMY_HASH = "$2a$10$CwTycUXWue0Thq9StjUM0uJ8Q9k5nAvVUOOFZOFZIYK1B5MnvcaGa";
+
 function issueToken(id: number, role: Role) {
   return jwt.sign({ sub: id, role }, env.jwtSecret, { expiresIn: TOKEN_TTL });
 }
 
 export async function loginAdmin(email: string, senha: string) {
   const admin = await prisma.admin.findUnique({ where: { email } });
-  if (!admin) {
-    throw new AppError(401, "Credenciais inválidas");
-  }
+  const senhaOk = await bcrypt.compare(senha, admin?.senhaHash ?? DUMMY_HASH);
 
-  const senhaOk = await bcrypt.compare(senha, admin.senhaHash);
-  if (!senhaOk) {
+  if (!admin || !senhaOk) {
     throw new AppError(401, "Credenciais inválidas");
   }
 
@@ -28,12 +27,9 @@ export async function loginAdmin(email: string, senha: string) {
 
 export async function loginCliente(email: string, senha: string) {
   const cliente = await prisma.cliente.findUnique({ where: { email } });
-  if (!cliente) {
-    throw new AppError(401, "Credenciais inválidas");
-  }
+  const senhaOk = await bcrypt.compare(senha, cliente?.senhaHash ?? DUMMY_HASH);
 
-  const senhaOk = await bcrypt.compare(senha, cliente.senhaHash);
-  if (!senhaOk) {
+  if (!cliente || !senhaOk) {
     throw new AppError(401, "Credenciais inválidas");
   }
 
