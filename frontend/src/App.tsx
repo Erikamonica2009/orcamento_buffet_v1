@@ -1,9 +1,12 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import { NotFoundPage } from "./pages/NotFoundPage";
+
 function App() {
   return (
-    <main>
-      <h1>Orçamento Buffet</h1>
-      <p>Ambiente de infraestrutura no ar.</p>
-    </main>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 

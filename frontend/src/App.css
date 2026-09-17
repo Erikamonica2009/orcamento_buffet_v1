@@ -1,0 +1,196 @@
+:root {
+  color-scheme: light;
+  --cor-primaria: #7a3b12;
+  --cor-fundo: #faf6f2;
+  --cor-texto: #2b1b12;
+  --cor-borda: #d8c7ba;
+  --cor-erro: #b3261e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: white;
+  border-right: 1px solid var(--cor-borda);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar nav a {
+  padding: 0.4rem 0;
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.sidebar nav a.active {
+  font-weight: 700;
+  color: var(--cor-primaria);
+}
+
+.nav-group {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #8a7666;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.auth-page {
+  max-width: 380px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+}
+
+.role-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  margin-bottom: 1rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.field-error {
+  color: var(--cor-erro);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.checkbox-option {
+  display: block;
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+}
+
+.error-page {
+  max-width: 480px;
+  margin: 4rem auto;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--cor-primaria);
+}
+
+.btn-danger {
+  background: var(--cor-erro);
+  border-color: var(--cor-erro);
+  color: white;
+}
+
+.toast-error {
+  background: #fdecea;
+  border: 1px solid var(--cor-erro);
+  color: var(--cor-erro);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 400px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.hint {
+  color: #8a7666;
+  font-size: 0.9rem;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 4rem;
+}

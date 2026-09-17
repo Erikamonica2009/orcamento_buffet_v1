@@ -13,5 +13,10 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/vite.config.ts ./vite.config.ts
+COPY --from=build /app/vitest.config.ts ./vitest.config.ts
+COPY --from=build /app/tsconfig.json ./tsconfig.json
+COPY --from=build /app/index.html ./index.html
+COPY --from=build /app/src ./src
+COPY --from=build /app/tests ./tests
 EXPOSE 5173
 CMD ["npm", "run", "preview"]
