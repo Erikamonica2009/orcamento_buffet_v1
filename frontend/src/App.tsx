@@ -4,6 +4,7 @@ import { CadastroPage } from "./pages/CadastroPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AppLayout } from "./components/AppLayout";
+import { MeusOrcamentosPage } from "./pages/cliente/MeusOrcamentosPage";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/meus-orcamentos" element={<p>Meus orçamentos</p>} />
+        <Route path="/meus-orcamentos" element={<MeusOrcamentosPage />} />
       </Route>
 
       <Route
