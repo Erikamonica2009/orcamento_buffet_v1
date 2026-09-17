@@ -165,7 +165,7 @@ export function MeusOrcamentosPage() {
             {orcamentos.map((orcamento) => (
               <tr key={orcamento.id}>
                 <td>{orcamento.tipoEvento.nome}</td>
-                <td>{new Date(orcamento.dataEvento).toLocaleDateString("pt-BR")}</td>
+                <td>{new Date(orcamento.dataEvento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</td>
                 <td>{orcamento.numConvidados}</td>
                 <td>{sanitizeText(orcamento.observacoes ?? "")}</td>
                 <td>{STATUS_LABELS[orcamento.status]}</td>
