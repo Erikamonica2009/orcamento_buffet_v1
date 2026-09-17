@@ -7,6 +7,8 @@ import { AppLayout } from "./components/AppLayout";
 import { MeusOrcamentosPage } from "./pages/cliente/MeusOrcamentosPage";
 import { AdminsPage } from "./pages/admin/AdminsPage";
 import { ClientesPage } from "./pages/admin/ClientesPage";
+import { TiposEventoPage } from "./pages/admin/TiposEventoPage";
+import { ItensPage } from "./pages/admin/ItensPage";
 
 function App() {
   return (
@@ -33,8 +35,8 @@ function App() {
       >
         <Route path="/admins" element={<AdminsPage />} />
         <Route path="/clientes" element={<ClientesPage />} />
-        <Route path="/tipos-evento" element={<p>Tipos de evento</p>} />
-        <Route path="/itens" element={<p>Itens</p>} />
+        <Route path="/tipos-evento" element={<TiposEventoPage />} />
+        <Route path="/itens" element={<ItensPage />} />
         <Route path="/orcamentos" element={<p>Orçamentos</p>} />
         <Route path="/orcamentos/:id" element={<p>Detalhe do orçamento</p>} />
       </Route>
