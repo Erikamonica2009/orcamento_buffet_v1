@@ -1,10 +1,12 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+﻿import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
 import { CadastroPage } from "./pages/CadastroPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AppLayout } from "./components/AppLayout";
 import { MeusOrcamentosPage } from "./pages/cliente/MeusOrcamentosPage";
+import { AdminsPage } from "./pages/admin/AdminsPage";
+import { ClientesPage } from "./pages/admin/ClientesPage";
 
 function App() {
   return (
@@ -29,8 +31,8 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/admins" element={<p>Administradores</p>} />
-        <Route path="/clientes" element={<p>Clientes</p>} />
+        <Route path="/admins" element={<AdminsPage />} />
+        <Route path="/clientes" element={<ClientesPage />} />
         <Route path="/tipos-evento" element={<p>Tipos de evento</p>} />
         <Route path="/itens" element={<p>Itens</p>} />
         <Route path="/orcamentos" element={<p>Orçamentos</p>} />
