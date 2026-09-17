@@ -1,5 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import { env } from "./config/env";
 import { errorHandler } from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFound";
 import { authRouter } from "./controllers/auth.controller";
@@ -11,6 +13,7 @@ import { orcamentosRouter } from "./controllers/orcamentos.controller";
 
 export const app = express();
 
+app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 

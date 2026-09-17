@@ -4,6 +4,8 @@ import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import { AppError } from "../middlewares/AppError";
 import { Role } from "../middlewares/auth";
+import { findAdminById } from "../repositories/admins.repository";
+import { findClienteById } from "../repositories/clientes.repository";
 
 const TOKEN_TTL = "8h";
 
@@ -35,4 +37,20 @@ export async function loginCliente(email: string, senha: string) {
 
   const token = issueToken(cliente.id, "cliente");
   return { token, cliente: { id: cliente.id, nome: cliente.nome, email: cliente.email } };
+}
+
+export async function getAuthenticatedUser(id: number, role: Role) {
+  if (role === "admin") {
+    const admin = await findAdminById(id);
+    if (!admin) {
+      throw new AppError(401, "Sessão inválida ou expirada");
+    }
+    return { id: admin.id, nome: admin.nome, email: admin.email, role: "admin" as const };
+  }
+
+  const cliente = await findClienteById(id);
+  if (!cliente) {
+    throw new AppError(401, "Sessão inválida ou expirada");
+  }
+  return { id: cliente.id, nome: cliente.nome, email: cliente.email, role: "cliente" as const };
 }

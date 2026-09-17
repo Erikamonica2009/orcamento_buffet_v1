@@ -1,7 +1,8 @@
 import { Router, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler";
+import { requireAuth } from "../middlewares/auth";
 import { loginSchema } from "../schemas/auth.schemas";
-import { loginAdmin, loginCliente } from "../services/auth.service";
+import { getAuthenticatedUser, loginAdmin, loginCliente } from "../services/auth.service";
 import { createRateLimiter } from "../middlewares/rateLimit";
 import { env } from "../config/env";
 
@@ -38,6 +39,15 @@ authRouter.post(
     const { token, cliente } = await loginCliente(email, senha);
     setAuthCookie(res, token);
     res.json(cliente);
+  })
+);
+
+authRouter.get(
+  "/me",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const me = await getAuthenticatedUser(req.auth!.sub, req.auth!.role);
+    res.json(me);
   })
 );
 
