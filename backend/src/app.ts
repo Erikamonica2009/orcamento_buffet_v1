@@ -16,6 +16,10 @@ export const app = express();
 app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use((_req, res, next) => {
+  res.setHeader("X-Frame-Options", "DENY");
+  next();
+});
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

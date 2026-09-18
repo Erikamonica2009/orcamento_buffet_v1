@@ -6,6 +6,7 @@ import {
   STATUS_LABELS,
   listOrcamentos,
 } from "../../services/orcamentos.service";
+import { formatDataEvento } from "../../utils/date";
 
 const STATUS_OPTIONS: OrcamentoStatus[] = ["PENDENTE", "EM_ANALISE", "APROVADO", "RECUSADO"];
 
@@ -57,7 +58,7 @@ export function OrcamentosListPage() {
             <tr key={orcamento.id}>
               <td>{orcamento.cliente.nome}</td>
               <td>{orcamento.tipoEvento.nome}</td>
-              <td>{new Date(orcamento.dataEvento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</td>
+              <td>{formatDataEvento(orcamento.dataEvento)}</td>
               <td>{STATUS_LABELS[orcamento.status]}</td>
               <td>{orcamento.valorTotal ? `R$ ${orcamento.valorTotal}` : "—"}</td>
               <td>

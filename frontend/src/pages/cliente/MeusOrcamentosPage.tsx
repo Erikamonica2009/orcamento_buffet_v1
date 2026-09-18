@@ -9,6 +9,7 @@ import type { Item } from "../../services/itens.service";
 import { createOrcamento, listMeusOrcamentos, STATUS_LABELS } from "../../services/orcamentos.service";
 import type { Orcamento } from "../../services/orcamentos.service";
 import { sanitizeText } from "../../utils/sanitize";
+import { formatDataEvento } from "../../utils/date";
 import { ApiError } from "../../services/api";
 import { useSubmitGuard } from "../../hooks/useSubmitGuard";
 import { FormField } from "../../components/FormField";
@@ -165,7 +166,7 @@ export function MeusOrcamentosPage() {
             {orcamentos.map((orcamento) => (
               <tr key={orcamento.id}>
                 <td>{orcamento.tipoEvento.nome}</td>
-                <td>{new Date(orcamento.dataEvento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</td>
+                <td>{formatDataEvento(orcamento.dataEvento)}</td>
                 <td>{orcamento.numConvidados}</td>
                 <td>{sanitizeText(orcamento.observacoes ?? "")}</td>
                 <td>{STATUS_LABELS[orcamento.status]}</td>

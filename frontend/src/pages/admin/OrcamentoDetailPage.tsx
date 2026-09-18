@@ -10,6 +10,7 @@ import {
   updateOrcamentoStatus,
 } from "../../services/orcamentos.service";
 import { sanitizeText } from "../../utils/sanitize";
+import { formatDataEvento } from "../../utils/date";
 import { FormField } from "../../components/FormField";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { useSubmitGuard } from "../../hooks/useSubmitGuard";
@@ -92,7 +93,7 @@ export function OrcamentoDetailPage() {
         <dt>Tipo de evento</dt>
         <dd>{orcamento.tipoEvento.nome}</dd>
         <dt>Data do evento</dt>
-        <dd>{new Date(orcamento.dataEvento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</dd>
+        <dd>{formatDataEvento(orcamento.dataEvento)}</dd>
         <dt>Convidados</dt>
         <dd>{orcamento.numConvidados}</dd>
         <dt>Observações</dt>
@@ -141,7 +142,9 @@ export function OrcamentoDetailPage() {
               ? "Recusar este orçamento? Esta decisão não pode ser desfeita."
               : "Marcar este orçamento como em análise?"
         }
-        onConfirm={() => pendingStatus && guardedAction(pendingStatus)}
+        onConfirm={() => {
+          if (pendingStatus) return guardedAction(pendingStatus);
+        }}
         onCancel={() => setPendingStatus(null)}
       />
     </div>

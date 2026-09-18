@@ -14,4 +14,9 @@ describe("app", () => {
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: "Rota não encontrada" });
   });
+
+  it("sets X-Frame-Options: DENY on every response", async () => {
+    const res = await request(app).get("/health");
+    expect(res.headers["x-frame-options"]).toBe("DENY");
+  });
 });
