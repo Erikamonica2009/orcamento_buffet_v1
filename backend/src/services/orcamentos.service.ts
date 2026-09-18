@@ -76,3 +76,20 @@ export async function updateOrcamentoStatus(
     respondidoEm: isFinalDecision ? new Date() : null,
   });
 }
+
+export async function responderAceiteCliente(id: number, clienteId: number, aceitar: boolean) {
+  const orcamento = await getOrcamentoOrThrow(id);
+
+  if (orcamento.clienteId !== clienteId) {
+    throw new AppError(403, "Acesso negado");
+  }
+  if (orcamento.status !== "AGUARDANDO_ACEITE_CLIENTE") {
+    throw new AppError(409, "Este orçamento não está aguardando aceite do cliente");
+  }
+
+  return orcamentosRepo.updateOrcamentoStatusRecord(id, {
+    status: aceitar ? "AGUARDANDO_PAGAMENTO" : "RECUSADO",
+    respondidoPorId: null,
+    respondidoEm: null,
+  });
+}

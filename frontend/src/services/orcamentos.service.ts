@@ -1,6 +1,12 @@
 import { api } from "./api";
 
-export type OrcamentoStatus = "PENDENTE" | "EM_ANALISE" | "APROVADO" | "RECUSADO";
+export type OrcamentoStatus =
+  | "PENDENTE"
+  | "EM_ANALISE"
+  | "AGUARDANDO_ACEITE_CLIENTE"
+  | "AGUARDANDO_PAGAMENTO"
+  | "APROVADO"
+  | "RECUSADO";
 
 export interface Orcamento {
   id: number;
@@ -14,7 +20,7 @@ export interface Orcamento {
   status: OrcamentoStatus;
   valorTotal: string | null;
   createdAt: string;
-  itens: { item: { id: number; nome: string; categoria: ItemCategoriaLike } }[];
+  itens: { item: { id: number; nome: string; descricao: string; categoria: ItemCategoriaLike } }[];
 }
 
 type ItemCategoriaLike = "COMIDA" | "BEBIDA" | "DECORACAO" | "ESTRUTURA" | "ENTRETENIMENTO";
@@ -28,7 +34,10 @@ export interface CreateOrcamentoInput {
 }
 
 export interface UpdateOrcamentoStatusInput {
-  status: Extract<OrcamentoStatus, "EM_ANALISE" | "APROVADO" | "RECUSADO">;
+  status: Extract<
+    OrcamentoStatus,
+    "EM_ANALISE" | "AGUARDANDO_ACEITE_CLIENTE" | "AGUARDANDO_PAGAMENTO" | "APROVADO" | "RECUSADO"
+  >;
   valorTotal?: number;
 }
 
@@ -53,9 +62,15 @@ export function updateOrcamentoStatus(id: number, input: UpdateOrcamentoStatusIn
   return api.patch<Orcamento>(`/orcamentos/${id}`, input);
 }
 
+export function responderAceiteCliente(id: number, aceitar: boolean) {
+  return api.patch<Orcamento>(`/orcamentos/${id}/aceite`, { aceitar });
+}
+
 export const STATUS_LABELS: Record<OrcamentoStatus, string> = {
   PENDENTE: "Pendente",
   EM_ANALISE: "Em análise",
+  AGUARDANDO_ACEITE_CLIENTE: "Aguardando aceite do cliente",
+  AGUARDANDO_PAGAMENTO: "Aguardando pagamento",
   APROVADO: "Aprovado",
   RECUSADO: "Recusado",
 };

@@ -18,6 +18,8 @@ enum ItemCategoria {
 enum OrcamentoStatus {
   PENDENTE
   EM_ANALISE
+  AGUARDANDO_ACEITE_CLIENTE
+  AGUARDANDO_PAGAMENTO
   APROVADO
   RECUSADO
 }
@@ -40,6 +42,7 @@ model Cliente {
   senhaHash  String      @map("senha_hash")
   telefone   String
   cpf        String      @unique
+  ativo      Boolean     @default(true)
   createdAt  DateTime    @default(now()) @map("created_at")
   orcamentos Orcamento[]
 

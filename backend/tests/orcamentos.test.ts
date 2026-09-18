@@ -26,7 +26,7 @@ beforeAll(async () => {
       email: CLIENTE_EMAIL,
       senhaHash,
       telefone: "11999990000",
-      cpf: "66666666666",
+      cpf: "87777777866",
     },
   });
   clienteId = cliente.id;
@@ -36,7 +36,7 @@ beforeAll(async () => {
       email: OUTRO_CLIENTE_EMAIL,
       senhaHash,
       telefone: "11999990001",
-      cpf: "77777777777",
+      cpf: "98888888977",
     },
   });
 
@@ -235,5 +235,63 @@ describe("PATCH /orcamentos/:id — admin decision", () => {
 
     const res = await adminAgent.patch(`/orcamentos/${id}`).send({ status: "APROVADO", valorTotal: 100 });
     expect(res.status).toBe(409);
+  });
+});
+
+describe("PATCH /orcamentos/:id/aceite — cliente accepts or rejects the proposed value", () => {
+  async function criarOrcamentoAguardandoAceite() {
+    const createRes = await clienteAgent.post("/orcamentos").send({
+      tipoEventoId,
+      dataEvento: "2026-12-24T20:00:00.000Z",
+      numConvidados: 40,
+      itensIds: [itemId],
+    });
+    const id = createRes.body.id;
+    await adminAgent
+      .patch(`/orcamentos/${id}`)
+      .send({ status: "AGUARDANDO_ACEITE_CLIENTE", valorTotal: 3000 });
+    return id;
+  }
+
+  it("rejects an admin hitting the cliente-only endpoint", async () => {
+    const id = await criarOrcamentoAguardandoAceite();
+    const res = await adminAgent.patch(`/orcamentos/${id}/aceite`).send({ aceitar: true });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects another cliente responding to someone else's orçamento", async () => {
+    const id = await criarOrcamentoAguardandoAceite();
+    const res = await outroClienteAgent.patch(`/orcamentos/${id}/aceite`).send({ aceitar: true });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects responding when the orçamento is not awaiting cliente acceptance", async () => {
+    const createRes = await clienteAgent.post("/orcamentos").send({
+      tipoEventoId,
+      dataEvento: "2026-12-24T20:00:00.000Z",
+      numConvidados: 12,
+      itensIds: [itemId],
+    });
+    const id = createRes.body.id;
+
+    const res = await clienteAgent.patch(`/orcamentos/${id}/aceite`).send({ aceitar: true });
+    expect(res.status).toBe(409);
+  });
+
+  it("moves the orçamento to AGUARDANDO_PAGAMENTO when the cliente accepts", async () => {
+    const id = await criarOrcamentoAguardandoAceite();
+
+    const res = await clienteAgent.patch(`/orcamentos/${id}/aceite`).send({ aceitar: true });
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("AGUARDANDO_PAGAMENTO");
+    expect(Number(res.body.valorTotal)).toBe(3000);
+  });
+
+  it("moves the orçamento to RECUSADO when the cliente rejects", async () => {
+    const id = await criarOrcamentoAguardandoAceite();
+
+    const res = await clienteAgent.patch(`/orcamentos/${id}/aceite`).send({ aceitar: false });
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("RECUSADO");
   });
 });

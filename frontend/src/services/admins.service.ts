@@ -13,12 +13,22 @@ export interface AdminInput {
   senha: string;
 }
 
+export interface AdminUpdateInput {
+  nome?: string;
+  email?: string;
+  senha?: string;
+}
+
 export function listAdmins() {
   return api.get<Admin[]>("/admins");
 }
 
 export function createAdmin(input: AdminInput) {
   return api.post<Admin>("/admins", input);
+}
+
+export function updateAdmin(id: number, input: AdminUpdateInput) {
+  return api.put<Admin>(`/admins/${id}`, input);
 }
 
 export function deleteAdmin(id: number) {

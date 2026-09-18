@@ -2,7 +2,7 @@ import { Router } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import { requireAuth, requireRole } from "../middlewares/auth";
 import { createRateLimiter } from "../middlewares/rateLimit";
-import { createClienteSchema } from "../schemas/clientes.schemas";
+import { createClienteSchema, updateClienteSchema } from "../schemas/clientes.schemas";
 import * as clientesService from "../services/clientes.service";
 import { parseId } from "../utils/parseId";
 
@@ -34,5 +34,24 @@ clientesRouter.get(
   requireRole("admin"),
   asyncHandler(async (req, res) => {
     res.json(await clientesService.getCliente(parseId(req.params.id)));
+  })
+);
+
+clientesRouter.put(
+  "/:id",
+  requireAuth,
+  requireRole("admin"),
+  asyncHandler(async (req, res) => {
+    const input = updateClienteSchema.parse(req.body);
+    res.json(await clientesService.updateCliente(parseId(req.params.id), input));
+  })
+);
+
+clientesRouter.delete(
+  "/:id",
+  requireAuth,
+  requireRole("admin"),
+  asyncHandler(async (req, res) => {
+    res.json(await clientesService.deactivateCliente(parseId(req.params.id)));
   })
 );

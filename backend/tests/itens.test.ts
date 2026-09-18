@@ -20,7 +20,7 @@ beforeAll(async () => {
       email: CLIENTE_EMAIL,
       senhaHash,
       telefone: "11999990000",
-      cpf: "55555555555",
+      cpf: "11000000036",
     },
   });
 

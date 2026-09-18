@@ -54,50 +54,53 @@ export function LoginPage() {
   }
 
   return (
-    <main className="auth-page">
-      <h1>Entrar</h1>
-      <div className="role-toggle">
-        <button
-          type="button"
-          className={role === "cliente" ? "btn" : "btn btn-secondary"}
-          onClick={() => setRole("cliente")}
-        >
-          Sou cliente
-        </button>
-        <button
-          type="button"
-          className={role === "admin" ? "btn" : "btn btn-secondary"}
-          onClick={() => setRole("admin")}
-        >
-          Sou administrador
-        </button>
+    <main className="login-page">
+      <div className="auth-page">
+        <img src="/img/logo.png" alt="Buffet Celebra" className="auth-logo" />
+        <h1>Entrar</h1>
+        <div className="role-toggle">
+          <button
+            type="button"
+            className={role === "cliente" ? "btn" : "btn btn-secondary"}
+            onClick={() => setRole("cliente")}
+          >
+            Sou cliente
+          </button>
+          <button
+            type="button"
+            className={role === "admin" ? "btn" : "btn btn-secondary"}
+            onClick={() => setRole("admin")}
+          >
+            Sou administrador
+          </button>
+        </div>
+
+        {apiError && <p className="toast-error">{apiError}</p>}
+
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <FormField
+            label="E-mail"
+            type="email"
+            autoComplete="username"
+            {...register("email")}
+            error={errors.email?.message}
+          />
+          <FormField
+            label="Senha"
+            type="password"
+            autoComplete="current-password"
+            {...register("senha")}
+            error={errors.senha?.message}
+          />
+          <button className="btn" type="submit" disabled={submitting}>
+            {submitting ? "Entrando…" : "Entrar"}
+          </button>
+        </form>
+
+        <p>
+          Ainda não tem conta? <a href="/cadastro">Cadastre-se</a>
+        </p>
       </div>
-
-      {apiError && <p className="toast-error">{apiError}</p>}
-
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <FormField
-          label="E-mail"
-          type="email"
-          autoComplete="username"
-          {...register("email")}
-          error={errors.email?.message}
-        />
-        <FormField
-          label="Senha"
-          type="password"
-          autoComplete="current-password"
-          {...register("senha")}
-          error={errors.senha?.message}
-        />
-        <button className="btn" type="submit" disabled={submitting}>
-          {submitting ? "Entrando…" : "Entrar"}
-        </button>
-      </form>
-
-      <p>
-        Ainda não tem conta? <a href="/cadastro">Cadastre-se</a>
-      </p>
     </main>
   );
 }

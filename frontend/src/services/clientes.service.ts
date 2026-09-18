@@ -6,6 +6,7 @@ export interface Cliente {
   email: string;
   telefone: string;
   cpf: string;
+  ativo: boolean;
   createdAt: string;
 }
 
@@ -15,6 +16,15 @@ export interface RegisterClienteInput {
   senha: string;
   telefone: string;
   cpf: string;
+}
+
+export interface UpdateClienteInput {
+  nome?: string;
+  email?: string;
+  senha?: string;
+  telefone?: string;
+  cpf?: string;
+  ativo?: boolean;
 }
 
 export function registerCliente(input: RegisterClienteInput) {
@@ -27,4 +37,12 @@ export function listClientes() {
 
 export function getCliente(id: number) {
   return api.get<Cliente>(`/clientes/${id}`);
+}
+
+export function updateCliente(id: number, input: UpdateClienteInput) {
+  return api.put<Cliente>(`/clientes/${id}`, input);
+}
+
+export function deactivateCliente(id: number) {
+  return api.delete<Cliente>(`/clientes/${id}`);
 }

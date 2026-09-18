@@ -42,7 +42,7 @@ const ADMIN_GROUPS: NavGroup[] = [
   {
     label: "Orçamentos",
     icon: IconOrcamentos,
-    items: [{ to: "/orcamentos", label: "Orçamentos", icon: IconOrcamentos }],
+    items: [{ to: "/orcamentos", label: "Lista de Orçamentos", icon: IconOrcamentos }],
   },
 ];
 
@@ -94,6 +94,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
+        <img src="/img/logo.png" alt="Buffet Celebra" className="sidebar-logo" />
         <p className="sidebar-user">{user?.nome}</p>
         <nav>
           {user?.role === "cliente" && (

@@ -8,7 +8,14 @@ import {
 } from "../../services/orcamentos.service";
 import { formatDataEvento } from "../../utils/date";
 
-const STATUS_OPTIONS: OrcamentoStatus[] = ["PENDENTE", "EM_ANALISE", "APROVADO", "RECUSADO"];
+const STATUS_OPTIONS: OrcamentoStatus[] = [
+  "PENDENTE",
+  "EM_ANALISE",
+  "AGUARDANDO_ACEITE_CLIENTE",
+  "AGUARDANDO_PAGAMENTO",
+  "APROVADO",
+  "RECUSADO",
+];
 
 export function OrcamentosListPage() {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);

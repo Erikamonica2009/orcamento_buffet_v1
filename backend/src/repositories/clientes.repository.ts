@@ -25,3 +25,10 @@ export function createClienteRecord(data: {
 }) {
   return prisma.cliente.create({ data });
 }
+
+export function updateClienteRecord(
+  id: number,
+  data: Partial<{ nome: string; email: string; senhaHash: string; telefone: string; cpf: string; ativo: boolean }>
+) {
+  return prisma.cliente.update({ where: { id }, data });
+}

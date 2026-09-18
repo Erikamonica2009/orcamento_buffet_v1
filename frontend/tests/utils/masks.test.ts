@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { maskCpf, maskTelefone, unmask } from "../../src/utils/masks";
+import { isValidCpf, maskCpf, maskTelefone, unmask } from "../../src/utils/masks";
 
 describe("maskCpf", () => {
   it("formats 11 digits as ###.###.###-##", () => {
@@ -29,5 +29,27 @@ describe("maskTelefone", () => {
 describe("unmask", () => {
   it("removes all non-digit characters", () => {
     expect(unmask("(11) 99999-0000")).toBe("11999990000");
+  });
+});
+
+describe("isValidCpf", () => {
+  it("accepts a CPF with correct check digits", () => {
+    expect(isValidCpf("12345678909")).toBe(true);
+  });
+
+  it("accepts a formatted CPF with punctuation", () => {
+    expect(isValidCpf("123.456.789-09")).toBe(true);
+  });
+
+  it("rejects a CPF with an incorrect check digit", () => {
+    expect(isValidCpf("12345678901")).toBe(false);
+  });
+
+  it("rejects CPFs made of a single repeated digit", () => {
+    expect(isValidCpf("11111111111")).toBe(false);
+  });
+
+  it("rejects strings with the wrong length", () => {
+    expect(isValidCpf("123")).toBe(false);
   });
 });

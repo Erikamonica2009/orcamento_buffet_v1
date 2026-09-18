@@ -1,6 +1,15 @@
 import { z } from "zod";
 
-export const orcamentoStatusEnum = z.enum(["PENDENTE", "EM_ANALISE", "APROVADO", "RECUSADO"]);
+export const orcamentoStatusEnum = z.enum([
+  "PENDENTE",
+  "EM_ANALISE",
+  "AGUARDANDO_ACEITE_CLIENTE",
+  "AGUARDANDO_PAGAMENTO",
+  "APROVADO",
+  "RECUSADO",
+]);
+
+const STATUS_QUE_EXIGEM_VALOR = ["AGUARDANDO_ACEITE_CLIENTE", "AGUARDANDO_PAGAMENTO", "APROVADO"] as const;
 
 export const createOrcamentoSchema = z.object({
   tipoEventoId: z.number().int().positive(),
@@ -15,13 +24,29 @@ export const createOrcamentoSchema = z.object({
 
 export const updateOrcamentoStatusSchema = z
   .object({
-    status: z.enum(["EM_ANALISE", "APROVADO", "RECUSADO"]),
+    status: z.enum([
+      "EM_ANALISE",
+      "AGUARDANDO_ACEITE_CLIENTE",
+      "AGUARDANDO_PAGAMENTO",
+      "APROVADO",
+      "RECUSADO",
+    ]),
     valorTotal: z.number().positive().optional(),
   })
-  .refine((data) => data.status !== "APROVADO" || data.valorTotal !== undefined, {
-    message: "valorTotal é obrigatório para aprovar o orçamento",
-    path: ["valorTotal"],
-  });
+  .refine(
+    (data) =>
+      !STATUS_QUE_EXIGEM_VALOR.includes(data.status as (typeof STATUS_QUE_EXIGEM_VALOR)[number]) ||
+      data.valorTotal !== undefined,
+    {
+      message: "valorTotal é obrigatório para este status",
+      path: ["valorTotal"],
+    }
+  );
+
+export const respostaClienteSchema = z.object({
+  aceitar: z.boolean(),
+});
 
 export type CreateOrcamentoInput = z.infer<typeof createOrcamentoSchema>;
 export type UpdateOrcamentoStatusInput = z.infer<typeof updateOrcamentoStatusSchema>;
+export type RespostaClienteInput = z.infer<typeof respostaClienteSchema>;

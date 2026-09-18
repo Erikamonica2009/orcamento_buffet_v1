@@ -5,6 +5,7 @@ import { createRateLimiter } from "../middlewares/rateLimit";
 import {
   createOrcamentoSchema,
   orcamentoStatusEnum,
+  respostaClienteSchema,
   updateOrcamentoStatusSchema,
 } from "../schemas/orcamentos.schemas";
 import * as orcamentosService from "../services/orcamentos.service";
@@ -60,6 +61,20 @@ orcamentosRouter.patch(
       parseId(req.params.id),
       req.auth!.sub,
       input
+    );
+    res.json(orcamento);
+  })
+);
+
+orcamentosRouter.patch(
+  "/:id/aceite",
+  requireRole("cliente"),
+  asyncHandler(async (req, res) => {
+    const input = respostaClienteSchema.parse(req.body);
+    const orcamento = await orcamentosService.responderAceiteCliente(
+      parseId(req.params.id),
+      req.auth!.sub,
+      input.aceitar
     );
     res.json(orcamento);
   })

@@ -31,7 +31,7 @@ export async function loginCliente(email: string, senha: string) {
   const cliente = await prisma.cliente.findUnique({ where: { email } });
   const senhaOk = await bcrypt.compare(senha, cliente?.senhaHash ?? DUMMY_HASH);
 
-  if (!cliente || !senhaOk) {
+  if (!cliente || !senhaOk || !cliente.ativo) {
     throw new AppError(401, "Credenciais inválidas");
   }
 
@@ -49,7 +49,7 @@ export async function getAuthenticatedUser(id: number, role: Role) {
   }
 
   const cliente = await findClienteById(id);
-  if (!cliente) {
+  if (!cliente || !cliente.ativo) {
     throw new AppError(401, "Sessão inválida ou expirada");
   }
   return { id: cliente.id, nome: cliente.nome, email: cliente.email, role: "cliente" as const };

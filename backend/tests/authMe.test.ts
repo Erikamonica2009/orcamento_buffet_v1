@@ -21,7 +21,7 @@ beforeAll(async () => {
       email: CLIENTE_EMAIL,
       senhaHash,
       telefone: "11999990001",
-      cpf: "22222222222",
+      cpf: "65555555644",
     },
   });
 });
