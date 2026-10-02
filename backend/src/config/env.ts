@@ -3,7 +3,18 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   jwtSecret: process.env.JWT_SECRET || "",
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  dataEncryptionKey: process.env.DATA_ENCRYPTION_KEY || "",
+  dataHashKey: process.env.DATA_HASH_KEY || "",
 };
+
+const HEX_256_BITS = /^[0-9a-fA-F]{64}$/;
+
+if (!HEX_256_BITS.test(env.dataEncryptionKey) || !HEX_256_BITS.test(env.dataHashKey)) {
+  throw new Error("DATA_ENCRYPTION_KEY and DATA_HASH_KEY must be 256-bit keys (64 hex characters)");
+}
+if (env.dataEncryptionKey.toLowerCase() === env.dataHashKey.toLowerCase()) {
+  throw new Error("DATA_ENCRYPTION_KEY and DATA_HASH_KEY must be different keys");
+}
 
 if (!env.jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required");

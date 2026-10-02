@@ -1,8 +1,11 @@
-import bcrypt from "bcryptjs";
 import { AppError } from "../middlewares/AppError";
 import * as clientesRepo from "../repositories/clientes.repository";
 import { CreateClienteInput, UpdateClienteInput } from "../schemas/clientes.schemas";
+import { maskCpf, maskTelefone } from "../utils/dataMasking";
+import { hashPassword } from "../utils/password";
 
+// CPF e telefone saem da API sempre mascarados: nenhuma tela precisa do valor completo
+// depois do cadastro (o admin vê só os 4 últimos dígitos).
 function toPublic(cliente: {
   id: number;
   nome: string;
@@ -16,8 +19,8 @@ function toPublic(cliente: {
     id: cliente.id,
     nome: cliente.nome,
     email: cliente.email,
-    telefone: cliente.telefone,
-    cpf: cliente.cpf,
+    telefone: maskTelefone(cliente.telefone),
+    cpf: maskCpf(cliente.cpf),
     ativo: cliente.ativo,
     createdAt: cliente.createdAt,
   };
@@ -49,7 +52,7 @@ export async function registerCliente(input: CreateClienteInput) {
     throw new AppError(409, "Já existe um cadastro com este CPF");
   }
 
-  const senhaHash = await bcrypt.hash(input.senha, 10);
+  const senhaHash = await hashPassword(input.senha);
   const cliente = await clientesRepo.createClienteRecord({
     nome: input.nome,
     email: input.email,
@@ -90,7 +93,7 @@ export async function updateCliente(id: number, input: UpdateClienteInput) {
   if (input.telefone !== undefined) data.telefone = input.telefone;
   if (input.cpf !== undefined) data.cpf = input.cpf;
   if (input.ativo !== undefined) data.ativo = input.ativo;
-  if (input.senha !== undefined) data.senhaHash = await bcrypt.hash(input.senha, 10);
+  if (input.senha !== undefined) data.senhaHash = await hashPassword(input.senha);
 
   const cliente = await clientesRepo.updateClienteRecord(id, data);
   return toPublic(cliente);

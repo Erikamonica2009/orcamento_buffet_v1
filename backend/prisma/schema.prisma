@@ -40,8 +40,10 @@ model Cliente {
   nome       String
   email      String      @unique
   senhaHash  String      @map("senha_hash")
+  // telefone e cpf guardam texto cifrado (AES-256-GCM); cpfHash é o blind index (HMAC) do CPF
   telefone   String
-  cpf        String      @unique
+  cpf        String
+  cpfHash    String?     @unique @map("cpf_hash")
   ativo      Boolean     @default(true)
   createdAt  DateTime    @default(now()) @map("created_at")
   orcamentos Orcamento[]

@@ -8,11 +8,13 @@ import { FormModal } from "../../components/FormModal";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { useSubmitGuard } from "../../hooks/useSubmitGuard";
 import { ApiError } from "../../services/api";
+import { SENHA_DICA, senhaSchema } from "../../utils/passwordPolicy";
 
 const adminSchema = z.object({
   nome: z.string().min(1, "Informe o nome"),
   email: z.string().email("Informe um e-mail válido"),
-  senha: z.union([z.string().length(0), z.string().min(6, "A senha deve ter ao menos 6 caracteres")]),
+  // Vazio = manter a senha atual (na edição); preenchida, segue a política de senha.
+  senha: z.union([z.string().length(0), senhaSchema]),
 });
 
 type AdminForm = z.infer<typeof adminSchema>;
@@ -186,6 +188,8 @@ export function AdminsPage() {
           <FormField
             label={editingId ? "Nova senha (deixe em branco para manter)" : "Senha"}
             type="password"
+            autoComplete="new-password"
+            hint={SENHA_DICA}
             {...register("senha")}
             error={errors.senha?.message}
           />

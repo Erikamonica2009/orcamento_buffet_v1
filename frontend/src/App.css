@@ -194,6 +194,12 @@ body {
   font: inherit;
 }
 
+.field-hint {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
 .field-error {
   color: var(--cor-erro);
   font-size: 0.85rem;

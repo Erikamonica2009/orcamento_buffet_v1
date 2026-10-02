@@ -28,10 +28,23 @@ describe("Admins CRUD", () => {
     expect(res.status).toBe(401);
   });
 
+  it("rejects an admin senha outside the password policy with 400", async () => {
+    const res = await agent
+      .post("/admins")
+      .send({ nome: "Admin Senha Fraca", email: "admins-test-senha-fraca@buffet.com", senha: "admin123" });
+    expect(res.status).toBe(400);
+    expect(res.body.detalhes).toEqual(
+      expect.arrayContaining([
+        "A senha deve conter ao menos uma letra maiúscula",
+        "A senha deve conter ao menos um caractere especial",
+      ])
+    );
+  });
+
   it("creates, lists, updates, and deletes an admin without ever leaking senhaHash", async () => {
     const createRes = await agent
       .post("/admins")
-      .send({ nome: "Novo Admin", email: "admins-test-novo@buffet.com", senha: "outrasenha123" });
+      .send({ nome: "Novo Admin", email: "admins-test-novo@buffet.com", senha: "Outra@Senha1" });
     expect(createRes.status).toBe(201);
     expect(createRes.body).toMatchObject({ nome: "Novo Admin", email: "admins-test-novo@buffet.com" });
     expect(createRes.body.senhaHash).toBeUndefined();
@@ -55,14 +68,14 @@ describe("Admins CRUD", () => {
   it("rejects duplicate email with 409", async () => {
     const res = await agent
       .post("/admins")
-      .send({ nome: "Duplicado", email: ADMIN_EMAIL, senha: "senha123456" });
+      .send({ nome: "Duplicado", email: ADMIN_EMAIL, senha: "Senha@123" });
     expect(res.status).toBe(409);
   });
 
   it("rejects updating an admin's email to one already in use with 409", async () => {
     const createRes = await agent
       .post("/admins")
-      .send({ nome: "Outro Admin", email: "admins-test-outro@buffet.com", senha: "outrasenha123" });
+      .send({ nome: "Outro Admin", email: "admins-test-outro@buffet.com", senha: "Outra@Senha1" });
     const otherId = createRes.body.id;
 
     const res = await agent.put(`/admins/${otherId}`).send({ email: ADMIN_EMAIL });

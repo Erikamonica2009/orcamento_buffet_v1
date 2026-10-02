@@ -3,11 +3,16 @@ import bcrypt from "bcryptjs";
 import request from "supertest";
 import { app } from "../src/app";
 import { prisma } from "../src/config/prisma";
+import { createClienteRecord } from "../src/repositories/clientes.repository";
 
 const ADMIN_EMAIL = "orcamentos-test-admin@buffet.com";
 const CLIENTE_EMAIL = "orcamentos-test-cliente@buffet.com";
 const OUTRO_CLIENTE_EMAIL = "orcamentos-test-outro@buffet.com";
 const SENHA = "senha-correta-123";
+
+const DIA_MS = 24 * 60 * 60 * 1000;
+// Data relativa a hoje para o teste não "vencer" com o passar do tempo.
+const DATA_FUTURA = new Date(Date.now() + 60 * DIA_MS).toISOString();
 
 let adminAgent: ReturnType<typeof request.agent>;
 let clienteAgent: ReturnType<typeof request.agent>;
@@ -20,24 +25,20 @@ beforeAll(async () => {
   const senhaHash = await bcrypt.hash(SENHA, 10);
 
   await prisma.admin.create({ data: { nome: "Admin Teste", email: ADMIN_EMAIL, senhaHash } });
-  const cliente = await prisma.cliente.create({
-    data: {
-      nome: "Cliente Teste",
-      email: CLIENTE_EMAIL,
-      senhaHash,
-      telefone: "11999990000",
-      cpf: "87777777866",
-    },
+  const cliente = await createClienteRecord({
+    nome: "Cliente Teste",
+    email: CLIENTE_EMAIL,
+    senhaHash,
+    telefone: "11999990000",
+    cpf: "87777777866",
   });
   clienteId = cliente.id;
-  await prisma.cliente.create({
-    data: {
-      nome: "Outro Cliente",
-      email: OUTRO_CLIENTE_EMAIL,
-      senhaHash,
-      telefone: "11999990001",
-      cpf: "98888888977",
-    },
+  await createClienteRecord({
+    nome: "Outro Cliente",
+    email: OUTRO_CLIENTE_EMAIL,
+    senhaHash,
+    telefone: "11999990001",
+    cpf: "98888888977",
   });
 
   const tipoEvento = await prisma.tipoEvento.create({
@@ -75,7 +76,7 @@ describe("POST /orcamentos", () => {
     const res = await clienteAgent.post("/orcamentos").send({
       clienteId: 999999,
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 100,
       observacoes: "Festa de fim de ano",
       itensIds: [itemId],
@@ -93,7 +94,7 @@ describe("POST /orcamentos", () => {
   it("rejects an admin trying to create an orçamento", async () => {
     const res = await adminAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 10,
       itensIds: [itemId],
     });
@@ -103,9 +104,23 @@ describe("POST /orcamentos", () => {
   it("rejects a request with no itens selected", async () => {
     const res = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 10,
       itensIds: [],
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it.each([
+    ["no passado", new Date(Date.now() - 3 * DIA_MS).toISOString()],
+    ["além de 2 anos", new Date(Date.now() + 3 * 365 * DIA_MS).toISOString()],
+    ["com ano de 6 dígitos", "202612-12-24"],
+  ])("rejects a dataEvento %s with 400", async (_caso, dataEvento) => {
+    const res = await clienteAgent.post("/orcamentos").send({
+      tipoEventoId,
+      dataEvento,
+      numConvidados: 10,
+      itensIds: [itemId],
     });
     expect(res.status).toBe(400);
   });
@@ -113,7 +128,7 @@ describe("POST /orcamentos", () => {
   it("rejects a request with duplicate itensIds", async () => {
     const res = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 10,
       itensIds: [itemId, itemId],
     });
@@ -127,7 +142,7 @@ describe("POST /orcamentos", () => {
 
     const res = await clienteAgent.post("/orcamentos").send({
       tipoEventoId: inactiveTipo.id,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 10,
       itensIds: [itemId],
     });
@@ -143,7 +158,7 @@ describe("POST /orcamentos", () => {
 
     const res = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 10,
       itensIds: [inactiveItem.id],
     });
@@ -159,7 +174,7 @@ describe("GET /orcamentos and /orcamentos/:id — scoping", () => {
   it("cliente only sees their own orçamentos", async () => {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 50,
       itensIds: [itemId],
     });
@@ -188,7 +203,7 @@ describe("PATCH /orcamentos/:id — admin decision", () => {
   it("requires valorTotal to approve", async () => {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 30,
       itensIds: [itemId],
     });
@@ -210,7 +225,7 @@ describe("PATCH /orcamentos/:id — admin decision", () => {
   it("rejects a cliente trying to change status", async () => {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 20,
       itensIds: [itemId],
     });
@@ -225,7 +240,7 @@ describe("PATCH /orcamentos/:id — admin decision", () => {
   it("rejects changing the status of an already-decided orçamento", async () => {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 15,
       itensIds: [itemId],
     });
@@ -242,7 +257,7 @@ describe("PATCH /orcamentos/:id/aceite — cliente accepts or rejects the propos
   async function criarOrcamentoAguardandoAceite() {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 40,
       itensIds: [itemId],
     });
@@ -268,7 +283,7 @@ describe("PATCH /orcamentos/:id/aceite — cliente accepts or rejects the propos
   it("rejects responding when the orçamento is not awaiting cliente acceptance", async () => {
     const createRes = await clienteAgent.post("/orcamentos").send({
       tipoEventoId,
-      dataEvento: "2026-12-24T20:00:00.000Z",
+      dataEvento: DATA_FUTURA,
       numConvidados: 12,
       itensIds: [itemId],
     });

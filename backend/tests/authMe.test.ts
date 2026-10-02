@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import request from "supertest";
 import { app } from "../src/app";
 import { prisma } from "../src/config/prisma";
+import { createClienteRecord } from "../src/repositories/clientes.repository";
 
 const ADMIN_EMAIL = "auth-me-test-admin@buffet.com";
 const CLIENTE_EMAIL = "auth-me-test-cliente@buffet.com";
@@ -15,14 +16,12 @@ beforeAll(async () => {
     data: { nome: "Admin Teste", email: ADMIN_EMAIL, senhaHash },
   });
 
-  await prisma.cliente.create({
-    data: {
-      nome: "Cliente Teste",
-      email: CLIENTE_EMAIL,
-      senhaHash,
-      telefone: "11999990001",
-      cpf: "65555555644",
-    },
+  await createClienteRecord({
+    nome: "Cliente Teste",
+    email: CLIENTE_EMAIL,
+    senhaHash,
+    telefone: "11999990001",
+    cpf: "65555555644",
   });
 });
 

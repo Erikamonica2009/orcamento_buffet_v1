@@ -6,13 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { FormField } from "../components/FormField";
 import { TermsDialog } from "../components/TermsDialog";
 import { isValidCpf, maskCpf, maskTelefone, unmask } from "../utils/masks";
+import { SENHA_DICA, senhaSchema } from "../utils/passwordPolicy";
 import { registerCliente } from "../services/clientes.service";
 import { ApiError } from "../services/api";
 
 const cadastroSchema = z.object({
   nome: z.string().min(1, "Informe o nome"),
   email: z.string().email("Informe um e-mail válido"),
-  senha: z.string().min(6, "A senha deve ter ao menos 6 caracteres"),
+  senha: senhaSchema,
   telefone: z
     .string()
     .transform(unmask)
@@ -79,6 +80,7 @@ export function CadastroPage() {
             label="Senha"
             type="password"
             autoComplete="new-password"
+            hint={SENHA_DICA}
             {...register("senha")}
             error={errors.senha?.message}
           />

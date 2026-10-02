@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import request from "supertest";
 import { app } from "../src/app";
 import { prisma } from "../src/config/prisma";
+import { createClienteRecord } from "../src/repositories/clientes.repository";
 
 const ADMIN_EMAIL = "itens-test-admin@buffet.com";
 const CLIENTE_EMAIL = "itens-test-cliente@buffet.com";
@@ -14,14 +15,12 @@ let clienteAgent: ReturnType<typeof request.agent>;
 beforeAll(async () => {
   const senhaHash = await bcrypt.hash(SENHA, 10);
   await prisma.admin.create({ data: { nome: "Admin Teste", email: ADMIN_EMAIL, senhaHash } });
-  await prisma.cliente.create({
-    data: {
-      nome: "Cliente Teste",
-      email: CLIENTE_EMAIL,
-      senhaHash,
-      telefone: "11999990000",
-      cpf: "11000000036",
-    },
+  await createClienteRecord({
+    nome: "Cliente Teste",
+    email: CLIENTE_EMAIL,
+    senhaHash,
+    telefone: "11999990000",
+    cpf: "11000000036",
   });
 
   adminAgent = request.agent(app);

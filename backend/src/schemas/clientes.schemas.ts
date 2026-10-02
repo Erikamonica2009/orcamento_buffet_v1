@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidCpf } from "../utils/cpf";
+import { senhaSchema } from "./senha.schemas";
 
 const cpfSchema = z
   .string()
@@ -9,7 +10,7 @@ const cpfSchema = z
 export const createClienteSchema = z.object({
   nome: z.string().min(1),
   email: z.string().email(),
-  senha: z.string().min(6),
+  senha: senhaSchema,
   telefone: z.string().min(8).max(20),
   cpf: cpfSchema,
 });
@@ -17,7 +18,7 @@ export const createClienteSchema = z.object({
 export const updateClienteSchema = z.object({
   nome: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  senha: z.string().min(6).optional(),
+  senha: senhaSchema.optional(),
   telefone: z.string().min(8).max(20).optional(),
   cpf: cpfSchema.optional(),
   ativo: z.boolean().optional(),

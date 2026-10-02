@@ -26,6 +26,21 @@ describe("CadastroPage", () => {
     expect(clientesService.registerCliente).not.toHaveBeenCalled();
   });
 
+  it("rejects a senha outside the password policy and never calls the API", async () => {
+    render(
+      <MemoryRouter>
+        <CadastroPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByLabelText("Senha")).toHaveAccessibleDescription(/letra maiúscula/);
+    await userEvent.type(screen.getByLabelText("Senha"), "senha123");
+    await userEvent.click(screen.getByRole("button", { name: "Cadastrar" }));
+
+    expect(await screen.findByText("A senha deve conter ao menos uma letra maiúscula")).toBeInTheDocument();
+    expect(clientesService.registerCliente).not.toHaveBeenCalled();
+  });
+
   it("shows a validation error for a CPF with an invalid check digit and never calls the API", async () => {
     render(
       <MemoryRouter>
@@ -58,7 +73,7 @@ describe("CadastroPage", () => {
 
     await userEvent.type(screen.getByLabelText("Nome"), "Maria");
     await userEvent.type(screen.getByLabelText("E-mail"), "maria@buffet.com");
-    await userEvent.type(screen.getByLabelText("Senha"), "senha123");
+    await userEvent.type(screen.getByLabelText("Senha"), "Senha@123");
     await userEvent.type(screen.getByLabelText("Telefone"), "11999990000");
     await userEvent.type(screen.getByLabelText("CPF"), "12345678909");
     await userEvent.click(screen.getByRole("checkbox"));

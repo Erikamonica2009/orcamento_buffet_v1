@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "../src/utils/password";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const email = process.env.ADMIN_SEED_EMAIL || "admin@buffet.com";
-  const senha = process.env.ADMIN_SEED_PASSWORD || "admin123";
-  const senhaHash = await bcrypt.hash(senha, 10);
+  const senha = process.env.ADMIN_SEED_PASSWORD || "Admin@123";
+  const senhaHash = await hashPassword(senha);
 
   const admin = await prisma.admin.upsert({
     where: { email },

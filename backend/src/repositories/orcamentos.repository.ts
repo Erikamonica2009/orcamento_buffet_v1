@@ -1,5 +1,6 @@
 import { OrcamentoStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
+import { decrypt } from "../utils/crypto";
 
 const includeFull = {
   cliente: { select: { id: true, nome: true, email: true, telefone: true } },
@@ -7,27 +8,35 @@ const includeFull = {
   itens: { include: { item: true } },
 } as const;
 
-export function findOrcamentosByCliente(clienteId: number) {
-  return prisma.orcamento.findMany({
+// O telefone do cliente é armazenado cifrado; decifra antes de sair da camada de dados.
+function decryptClienteTelefone<T extends { cliente: { telefone: string } }>(orcamento: T): T {
+  return { ...orcamento, cliente: { ...orcamento.cliente, telefone: decrypt(orcamento.cliente.telefone) } };
+}
+
+export async function findOrcamentosByCliente(clienteId: number) {
+  const orcamentos = await prisma.orcamento.findMany({
     where: { clienteId },
     include: includeFull,
     orderBy: { id: "desc" },
   });
+  return orcamentos.map(decryptClienteTelefone);
 }
 
-export function findAllOrcamentos(status?: OrcamentoStatus) {
-  return prisma.orcamento.findMany({
+export async function findAllOrcamentos(status?: OrcamentoStatus) {
+  const orcamentos = await prisma.orcamento.findMany({
     where: status ? { status } : undefined,
     include: includeFull,
     orderBy: { id: "desc" },
   });
+  return orcamentos.map(decryptClienteTelefone);
 }
 
-export function findOrcamentoById(id: number) {
-  return prisma.orcamento.findUnique({ where: { id }, include: includeFull });
+export async function findOrcamentoById(id: number) {
+  const orcamento = await prisma.orcamento.findUnique({ where: { id }, include: includeFull });
+  return orcamento ? decryptClienteTelefone(orcamento) : null;
 }
 
-export function createOrcamentoRecord(data: {
+export async function createOrcamentoRecord(data: {
   clienteId: number;
   tipoEventoId: number;
   dataEvento: Date;
@@ -35,7 +44,7 @@ export function createOrcamentoRecord(data: {
   observacoes?: string;
   itensIds: number[];
 }) {
-  return prisma.orcamento.create({
+  const orcamento = await prisma.orcamento.create({
     data: {
       clienteId: data.clienteId,
       tipoEventoId: data.tipoEventoId,
@@ -48,9 +57,10 @@ export function createOrcamentoRecord(data: {
     },
     include: includeFull,
   });
+  return decryptClienteTelefone(orcamento);
 }
 
-export function updateOrcamentoStatusRecord(
+export async function updateOrcamentoStatusRecord(
   id: number,
   data: {
     status: OrcamentoStatus;
@@ -59,5 +69,6 @@ export function updateOrcamentoStatusRecord(
     respondidoEm: Date | null;
   }
 ) {
-  return prisma.orcamento.update({ where: { id }, data, include: includeFull });
+  const orcamento = await prisma.orcamento.update({ where: { id }, data, include: includeFull });
+  return decryptClienteTelefone(orcamento);
 }

@@ -27,7 +27,7 @@ describe("POST /clientes (public registration)", () => {
     const res = await request(app).post("/clientes").send({
       nome: "Cliente Novo",
       email: "clientes-test-novo@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "10000000108",
     });
@@ -37,11 +37,28 @@ describe("POST /clientes (public registration)", () => {
     expect(res.body.senhaHash).toBeUndefined();
   });
 
+  it("rejects a senha outside the password policy with 400", async () => {
+    const res = await request(app).post("/clientes").send({
+      nome: "Cliente Senha Fraca",
+      email: "clientes-test-senha-fraca@buffet.com",
+      senha: "senha123456",
+      telefone: "11988887777",
+      cpf: "10000000108",
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.detalhes).toEqual(
+      expect.arrayContaining([
+        "A senha deve conter ao menos uma letra maiúscula",
+        "A senha deve conter ao menos um caractere especial",
+      ])
+    );
+  });
+
   it("rejects an invalid CPF with 400", async () => {
     const res = await request(app).post("/clientes").send({
       nome: "Cliente Inválido",
       email: "clientes-test-invalido@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "123",
     });
@@ -52,7 +69,7 @@ describe("POST /clientes (public registration)", () => {
     const res = await request(app).post("/clientes").send({
       nome: "Cliente CPF Falso",
       email: "clientes-test-cpf-falso@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "12345678901",
     });
@@ -63,7 +80,7 @@ describe("POST /clientes (public registration)", () => {
     const res = await request(app).post("/clientes").send({
       nome: "Cliente CPF Repetido",
       email: "clientes-test-cpf-repetido@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "11111111111",
     });
@@ -74,7 +91,7 @@ describe("POST /clientes (public registration)", () => {
     const res = await request(app).post("/clientes").send({
       nome: "Duplicado",
       email: "clientes-test-novo@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "21111111200",
     });
@@ -87,7 +104,7 @@ describe("GET /clientes (admin only)", () => {
     const clienteAgent = request.agent(app);
     await clienteAgent.post("/auth/cliente/login").send({
       email: "clientes-test-novo@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
     });
     const res = await clienteAgent.get("/clientes");
     expect(res.status).toBe(403);
@@ -112,7 +129,7 @@ describe("PUT/DELETE /clientes/:id (admin only)", () => {
     const createRes = await request(app).post("/clientes").send({
       nome: "Cliente Editar",
       email: "clientes-test-editar@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "32222222311",
     });
@@ -128,7 +145,7 @@ describe("PUT/DELETE /clientes/:id (admin only)", () => {
     const createRes = await request(app).post("/clientes").send({
       nome: "Cliente Conflito",
       email: "clientes-test-conflito@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "43333333422",
     });
@@ -142,7 +159,7 @@ describe("PUT/DELETE /clientes/:id (admin only)", () => {
     const createRes = await request(app).post("/clientes").send({
       nome: "Cliente Desativar",
       email: "clientes-test-desativar@buffet.com",
-      senha: "senha123456",
+      senha: "Senha@123",
       telefone: "11988887777",
       cpf: "54444444533",
     });
@@ -154,7 +171,7 @@ describe("PUT/DELETE /clientes/:id (admin only)", () => {
 
     const loginBlockedRes = await request(app)
       .post("/auth/cliente/login")
-      .send({ email: "clientes-test-desativar@buffet.com", senha: "senha123456" });
+      .send({ email: "clientes-test-desativar@buffet.com", senha: "Senha@123" });
     expect(loginBlockedRes.status).toBe(401);
 
     const reactivateRes = await agent.put(`/clientes/${id}`).send({ ativo: true });
@@ -163,7 +180,7 @@ describe("PUT/DELETE /clientes/:id (admin only)", () => {
 
     const loginOkRes = await request(app)
       .post("/auth/cliente/login")
-      .send({ email: "clientes-test-desativar@buffet.com", senha: "senha123456" });
+      .send({ email: "clientes-test-desativar@buffet.com", senha: "Senha@123" });
     expect(loginOkRes.status).toBe(200);
   });
 });

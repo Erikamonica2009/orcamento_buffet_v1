@@ -15,21 +15,23 @@ import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { useSubmitGuard } from "../../hooks/useSubmitGuard";
 import { ApiError } from "../../services/api";
 import { sanitizeText } from "../../utils/sanitize";
-import { isValidCpf, maskCpf, maskCpfParcial, maskTelefone, unmask } from "../../utils/masks";
+import { isValidCpf, maskCpf, maskTelefone, unmask } from "../../utils/masks";
+import { SENHA_DICA, senhaSchema } from "../../utils/passwordPolicy";
 
 const clienteSchema = z.object({
   nome: z.string().min(1, "Informe o nome"),
   email: z.string().email("Informe um e-mail válido"),
-  senha: z.union([z.string().length(0), z.string().min(6, "A senha deve ter ao menos 6 caracteres")]),
+  // Vazio = manter a senha atual (na edição); preenchida, segue a política de senha.
+  senha: z.union([z.string().length(0), senhaSchema]),
   telefone: z
     .string()
     .transform(unmask)
-    .refine((v) => v.length >= 10 && v.length <= 11, "Informe um telefone válido"),
+    .refine((v) => v.length === 0 || (v.length >= 10 && v.length <= 11), "Informe um telefone válido"),
   cpf: z
     .string()
     .transform(unmask)
-    .refine((v) => /^\d{11}$/.test(v), "CPF deve conter 11 dígitos")
-    .refine(isValidCpf, "CPF inválido"),
+    .refine((v) => v.length === 0 || /^\d{11}$/.test(v), "CPF deve conter 11 dígitos")
+    .refine((v) => v.length === 0 || isValidCpf(v), "CPF inválido"),
 });
 
 type ClienteForm = z.infer<typeof clienteSchema>;
@@ -41,6 +43,7 @@ export function ClientesPage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [toDeactivate, setToDeactivate] = useState<Cliente | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editing, setEditing] = useState<Cliente | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState<string | null>(null);
@@ -82,27 +85,36 @@ export function ClientesPage() {
 
   function startEdit(cliente: Cliente) {
     setEditingId(cliente.id);
+    setEditing(cliente);
     setApiError(null);
-    reset({ nome: cliente.nome, email: cliente.email, senha: "", telefone: cliente.telefone, cpf: cliente.cpf });
+    // CPF e telefone chegam mascarados da API (data masking no backend): o formulário começa
+    // vazio e só envia esses campos se o admin digitar um valor novo.
+    reset({ nome: cliente.nome, email: cliente.email, senha: "", telefone: "", cpf: "" });
     setModalOpen(true);
   }
 
   function closeModal() {
     setModalOpen(false);
     setEditingId(null);
+    setEditing(null);
     reset(EMPTY_FORM);
   }
 
   const { submitting, guardedAction } = useSubmitGuard(async (data: ClienteForm) => {
     setApiError(null);
-    if (!editingId && !data.senha) {
-      setApiError("Informe a senha");
+    if (!editingId && (!data.senha || !data.telefone || !data.cpf)) {
+      setApiError("Informe senha, telefone e CPF");
       return;
     }
     try {
       if (editingId) {
-        const { senha, ...rest } = data;
-        await updateCliente(editingId, senha ? { ...rest, senha } : rest);
+        const { senha, telefone, cpf, ...rest } = data;
+        await updateCliente(editingId, {
+          ...rest,
+          ...(senha && { senha }),
+          ...(telefone && { telefone }),
+          ...(cpf && { cpf }),
+        });
       } else {
         await registerCliente(data);
       }
@@ -189,7 +201,7 @@ export function ClientesPage() {
                 <td>{sanitizeText(cliente.nome)}</td>
                 <td>{cliente.email}</td>
                 <td>{cliente.telefone}</td>
-                <td>{maskCpfParcial(cliente.cpf)}</td>
+                <td>{cliente.cpf}</td>
                 <td>{cliente.ativo ? "Ativo" : "Inativo"}</td>
                 <td>
                   <button className="btn btn-secondary" onClick={() => startEdit(cliente)}>
@@ -223,6 +235,8 @@ export function ClientesPage() {
           <FormField
             label={editingId ? "Nova senha (deixe em branco para manter)" : "Senha"}
             type="password"
+            autoComplete="new-password"
+            hint={SENHA_DICA}
             {...register("senha")}
             error={errors.senha?.message}
           />
@@ -231,7 +245,7 @@ export function ClientesPage() {
             name="telefone"
             render={({ field }) => (
               <FormField
-                label="Telefone"
+                label={editing ? `Novo telefone (atual: ${editing.telefone} — em branco mantém)` : "Telefone"}
                 id="telefone"
                 name="telefone"
                 inputMode="numeric"
@@ -247,7 +261,7 @@ export function ClientesPage() {
             name="cpf"
             render={({ field }) => (
               <FormField
-                label="CPF"
+                label={editing ? `Novo CPF (atual: ${editing.cpf} — em branco mantém)` : "CPF"}
                 id="cpf"
                 name="cpf"
                 inputMode="numeric"

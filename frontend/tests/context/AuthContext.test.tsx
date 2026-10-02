@@ -9,7 +9,7 @@ function Probe() {
   return (
     <div>
       <p>{user ? `logado:${user.nome}:${user.role}` : "deslogado"}</p>
-      <button onClick={() => loginAdmin("admin@buffet.com", "admin123")}>entrar</button>
+      <button onClick={() => loginAdmin("admin@buffet.com", "Admin@123")}>entrar</button>
       <button onClick={() => logout()}>sair</button>
     </div>
   );

@@ -9,6 +9,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    ports:
+      - "5432:5432"
     networks:
       - orcamento_net
     healthcheck:
@@ -25,7 +27,15 @@ services:
       PORT: ${BACKEND_PORT}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-5173}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Menor privilégio: a aplicação conecta com um usuário restrito (só DML nas tabelas).
+      # O dono do banco (POSTGRES_USER) só é usado para migrations e para criar esse usuário.
+      DATABASE_URL: postgresql://${APP_DB_USER}:${APP_DB_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL_OWNER: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      # Criptografia em repouso (AES-256-GCM) e blind index (HMAC) dos dados sensíveis.
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
+      DATA_HASH_KEY: ${DATA_HASH_KEY}
       DATABASE_URL_TEST: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/orcamento_buffet_test
       ADMIN_SEED_EMAIL: ${ADMIN_SEED_EMAIL}
       ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD}

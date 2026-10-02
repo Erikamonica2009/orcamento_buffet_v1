@@ -14,7 +14,7 @@ import {
 } from "../../services/orcamentos.service";
 import type { Orcamento } from "../../services/orcamentos.service";
 import { sanitizeText } from "../../utils/sanitize";
-import { formatDataEvento } from "../../utils/date";
+import { dataEventoMax, dataEventoMin, formatDataEvento, validarDataEvento } from "../../utils/date";
 import { ApiError } from "../../services/api";
 import { useSubmitGuard } from "../../hooks/useSubmitGuard";
 import { FormField } from "../../components/FormField";
@@ -23,7 +23,10 @@ import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 const orcamentoSchema = z.object({
   tipoEventoId: z.coerce.number().int().positive("Selecione um tipo de evento"),
-  dataEvento: z.string().min(1, "Informe a data do evento"),
+  dataEvento: z.string().superRefine((valor, ctx) => {
+    const erro = validarDataEvento(valor);
+    if (erro) ctx.addIssue({ code: z.ZodIssueCode.custom, message: erro });
+  }),
   numConvidados: z.coerce.number().int().positive("Informe o número de convidados"),
   observacoes: z.string().max(500, "Máximo de 500 caracteres").optional(),
   itensIds: z.array(z.number()).min(1, "Selecione ao menos um item"),
@@ -182,6 +185,8 @@ export function MeusOrcamentosPage() {
           <FormField
             label="Data do evento"
             type="date"
+            min={dataEventoMin()}
+            max={dataEventoMax()}
             {...register("dataEvento")}
             error={errors.dataEvento?.message}
           />
