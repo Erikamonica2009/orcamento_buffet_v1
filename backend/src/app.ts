@@ -13,6 +13,7 @@ import { orcamentosRouter } from "./controllers/orcamentos.controller";
 
 export const app = express();
 
+app.set("trust proxy", env.trustProxy);
 app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());

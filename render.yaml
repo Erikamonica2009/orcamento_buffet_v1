@@ -1,0 +1,48 @@
+# Blueprint do Render: backend (Docker) + Postgres. O frontend fica na Vercel (frontend/vercel.json),
+# que repassa /api para este serviço.
+databases:
+  - name: orcamento-buffet-db
+    plan: free
+    databaseName: orcamento_buffet
+    user: buffet
+
+services:
+  - type: web
+    name: orcamento-buffet-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Dono do banco: só para migrations e para criar o usuário restrito (start.sh).
+      - key: DATABASE_URL_OWNER
+        fromDatabase:
+          name: orcamento-buffet-db
+          property: connectionString
+      # Menor privilégio: o servidor HTTP conecta com este usuário.
+      - key: APP_DB_USER
+        value: buffet_app
+      - key: APP_DB_PASSWORD
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      # Chaves de 64 caracteres hex, diferentes das usadas localmente. Preenchidas no painel.
+      - key: DATA_ENCRYPTION_KEY
+        sync: false
+      - key: DATA_HASH_KEY
+        sync: false
+      - key: ADMIN_SEED_EMAIL
+        value: admin@buffet.com
+      # A senha do README é pública: em produção o admin precisa de outra.
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: SEED_ON_START
+        value: "true"
+      - key: CORS_ORIGIN
+        value: https://orcamento-buffet.vercel.app
+      # A Vercel sobrescreve o X-Forwarded-For com o IP real do cliente; o rate limit usa esse IP.
+      - key: TRUST_PROXY
+        value: "true"

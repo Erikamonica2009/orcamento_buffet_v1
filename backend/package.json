@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "DATABASE_URL=$DATABASE_URL_OWNER prisma migrate deploy && node dist/scripts/setupDatabase.js && node dist/main.js",
+    "start": "sh ./start.sh",
     "test": "DATABASE_URL=$DATABASE_URL_TEST prisma migrate deploy && DATABASE_URL_OWNER=$DATABASE_URL_TEST ts-node src/scripts/setupDatabase.ts && DATABASE_URL=$DATABASE_URL_TEST vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"

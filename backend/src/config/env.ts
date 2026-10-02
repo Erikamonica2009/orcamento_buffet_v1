@@ -5,7 +5,17 @@ export const env = {
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
   dataEncryptionKey: process.env.DATA_ENCRYPTION_KEY || "",
   dataHashKey: process.env.DATA_HASH_KEY || "",
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
 };
+
+// Atrás de proxies (Vercel → Render), o IP real do cliente vem no X-Forwarded-For. Sem isso o
+// rate limit veria todos os usuários com o IP do proxy e bloquearia todo mundo junto.
+// "true" = confiar na cadeia toda; um número = quantos proxies confiar; vazio/false = nenhum.
+function parseTrustProxy(value?: string): boolean | number {
+  if (value === "true") return true;
+  const hops = Number(value);
+  return Number.isInteger(hops) && hops > 0 ? hops : false;
+}
 
 const HEX_256_BITS = /^[0-9a-fA-F]{64}$/;
 
